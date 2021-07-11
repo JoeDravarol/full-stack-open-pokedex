@@ -33,3 +33,5 @@ jobs:
           heroku_api_key: ${{secrets.HEROKU_API_KEY}}
           heroku_app_name: "moch-pokedex"
           heroku_email: ${{secrets.EMAIL}}
+          healthCheck: "https://moch-pokedex.herokuapp.com/health"
+          checkstring: "ok"
