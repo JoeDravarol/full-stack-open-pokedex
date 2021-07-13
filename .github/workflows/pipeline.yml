@@ -47,3 +47,29 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
+      - name: slack success notification
+        uses: 8398a7/action-slack@dcc8c8e9dd8802e21a712dc0c003db97b42efe43
+        if: ${{ success() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+        with:
+          status: custom
+          fields: commit,author,took
+          custom_payload: |
+            {
+              username: 'action-slack',
+              channel: '#code',
+              icon_emoji: ':octocat:',
+              attachments: [{
+                color: 'good',
+                text: `a new version deployed to https://moch-pokedex.herokuapp.com (${process.env.AS_COMMIT}) by ${process.env.AS_AUTHOR} build took ${process.env.AS_TOOK}`
+              }]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: slack failure notification
+        uses: 8398a7/action-slack@dcc8c8e9dd8802e21a712dc0c003db97b42efe43
+        if: ${{ failure() && github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' '), '#skip') }}
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
